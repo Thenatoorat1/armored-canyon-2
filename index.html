@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Izometryczna gra artyleryjska z czołgami w przeglądarce.">
-<title>Armored Canyon ISO</title>
+<title>Armored Canyon 2</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&display=swap">
 <style>
 :root{
@@ -126,7 +126,7 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
       <div class="wins" id="w0">Wygrane: 0</div>
     </div>
     <div class="mid">
-      <div id="turn">Armored Canyon ISO</div>
+      <div id="turn">Armored Canyon 2</div>
       <div class="wind" title="Wiatr – strzałka pokazuje kierunek na ekranie">
         Wiatr
         <svg id="warrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 6h8V2l6 6-6 6v-4H1z" fill="currentColor" shape-rendering="crispEdges"/></svg>
@@ -171,7 +171,7 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
 
 <div id="ov">
   <div class="panel" id="pMenu">
-    <h1>Armored Canyon <em>ISO</em></h1>
+    <h1>Armored Canyon <em>2</em></h1>
     <p class="ver" id="verMenu"></p>
     <p>Artyleria czołgów na niszczalnym terenie. Ustaw kierunek wieży, kąt lufy i moc, weź poprawkę na wiatr i rozbij przeciwnika, zanim on rozbije ciebie. Wybuchy kopią kratery, kruszą budynki i łamią drzewa, a czołg, któremu zabierzesz grunt spod gąsienic, spadnie. Każda runda to nowa, losowa mapa.</p>
     <div class="opt"><span>Wielkość mapy</span><div class="seg" id="mapSize">
@@ -219,7 +219,7 @@ const LLEN=Math.hypot(-0.62,-0.10,0.78),LX=-0.62/LLEN,LY=-0.10/LLEN,LZ=0.78/LLEN
 const SHV=[0.62/0.78,0.10/0.78];                   /* shadow offset per unit of height, view space */
 const R2=Math.SQRT2;
 let W=MAPW,H=MAPH,K=1,MX=0,MY=0,OX=MAPW/2,OY=MAPTOP,BGG=null;
-const VERSION='1.2';
+const VERSION='1.3';
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 const $=id=>document.getElementById(id);
@@ -988,7 +988,7 @@ function setCls(id,c,on){const k=id+c;if(hc[k]!==on){hc[k]=on;$(id).classList.to
 function hud(){const t=cur();
   G.tanks.forEach((tk,k)=>{set('n'+k,tk.name);set('hp'+k,tk.alive?tk.hp+' HP':'wrak');setStyle('b'+k,'width',tk.hp+'%');
     set('w'+k,'Wygrane: '+G.score[k]);setCls('card'+k,'on',G.inGame&&G.turn===k&&G.state==='aim');});
-  let turn='Armored Canyon ISO';
+  let turn='Armored Canyon 2';
   if(G.inGame){if(G.state==='aim')turn=t.ai?'Komputer celuje…':(G.mode==='cpu'?'Twoja tura':'Tura: '+t.name);
     else if(G.state==='fly')turn='Pocisk w locie';else if(G.state==='settle')turn='…';else if(G.state==='over')turn='Koniec rundy';}
   set('turn',turn);
