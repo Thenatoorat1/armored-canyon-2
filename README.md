@@ -1,6 +1,6 @@
 # Armored Canyon 2
 
-Wersja 1.6 (numer widać w menu i w górnym pasku gry).
+Wersja 1.7 (numer widać w menu i w górnym pasku gry).
 
 Izometryczna gra artyleryjska z czołgami, działająca w przeglądarce. Cała gra to jeden plik `index.html`, bez instalacji i bez serwera.
 
@@ -14,6 +14,8 @@ Ustaw kierunek wieży, kąt lufy i moc, weź poprawkę na wiatr i trafiaj przeci
 - **Mapa:** losowa w każdej rundzie, do wyboru mała, średnia, duża albo losowa wielkość
 - **Klimaty:** umiarkowany, zima (śnieg na drzewach, losowo zamarznięte stawy), Antarktyda (lód i kry), pustynia, skały z rzekami, góry z gęstymi lasami i rwącą rzeką
 - **Pogoda:** zmienia się w trakcie walki – deszcz, burza z piorunami, mgła, śnieżyca, zamieć, upał, burza piaskowa; silniejszy i porywisty wiatr oraz gorsza widoczność toru lotu
+- **Mieszkańcy:** co kilka rund z krawędzi mapy nadciągają dwie wrogie sobie frakcje pasujące do klimatu (np. skorpiony i czerwie na pustyni, pingwiny-komandosi i lodowe golemy na Antarktydzie). Atakują oba czołgi i walczą między sobą; da się je trafiać pociskami
+- **Złoto i przekupstwo:** złoto za każdą turę, za trafienia przeciwnika i za zabitych mieszkańców. Klawisz B lub przycisk „Przekup” – za złoto albo 1 ciężki + 1 kasetowy pocisk frakcja przez 3 rundy nie atakuje ciebie i rzuca się na przeciwnika. Komputer też potrafi przekupywać
 - **Woda:** rwący nurt porywa czołg, który wjedzie do rzeki (może go wynieść za mapę), lód pęka od wybuchów
 - **Otoczenie:** budynki z klocków rozpadają się kawałek po kawałku w miejscu trafienia, a niepodparte części osuwają się w dół; drzewa łamią się i padają
 
@@ -33,6 +35,7 @@ Ustaw kierunek wieży, kąt lufy i moc, weź poprawkę na wiatr i trafiaj przeci
 | wciśnięta rolka + ruch myszy | obrót kamery w lewo lub w prawo |
 | 1 / 2 / 3 lub Tab | wybór broni |
 | F | pełny ekran |
+| B | przekupienie frakcji mieszkańców |
 | M | dźwięk wł./wył. |
 | Esc | menu |
 
