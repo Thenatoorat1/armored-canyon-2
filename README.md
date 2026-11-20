@@ -9,6 +9,8 @@ Ustaw kierunek wieży, kąt lufy i moc, weź poprawkę na wiatr i trafiaj przeci
 - **Tryby:** Gracz vs Komputer albo 2 graczy na jednym ekranie
 - **Pole walki:** siatka heksagonalna, 4 ruchy na turę
 - **Bronie:** pocisk (bez limitu), ciężki (×3), kasetowy (×2)
+- **Mapa:** losowa w każdej rundzie, do wyboru mała, średnia, duża albo losowa wielkość
+- **Otoczenie:** budynki rozpadają się etapami po trafieniach, drzewa łamią się i padają
 
 ## Sterowanie
 
