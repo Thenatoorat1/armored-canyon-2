@@ -134,6 +134,7 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
       </div>
       <div class="mini">
         <button class="btn" id="bMenu">Menu</button>
+        <button class="btn" id="bZout" aria-label="Oddal">−</button><button class="btn" id="bZin" aria-label="Przybliż">+</button>
         <button class="btn" id="bFs">Pełny ekran</button>
         <button class="btn" id="bMute">Dźwięk: wł.</button>
         <span class="ver" id="verHud"></span>
@@ -185,7 +186,8 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
     <dl class="keys">
       <dt><kbd>←</kbd><kbd>→</kbd></dt><dd>obrót wieży (z Shift wolniej)</dd>
       <dt><kbd>↑</kbd><kbd>↓</kbd></dt><dd>kąt lufy</dd>
-      <dt><kbd>Z</kbd><kbd>X</kbd></dt><dd>moc strzału (albo kółko myszy)</dd>
+      <dt><kbd>Z</kbd><kbd>X</kbd></dt><dd>moc strzału (albo Shift + kółko myszy)</dd>
+      <dt>Kółko myszy</dt><dd>zbliżenie do miejsca pod kursorem (też <kbd>+</kbd> <kbd>−</kbd>, <kbd>0</kbd> wraca do całej mapy); prawy przycisk + ruch przesuwa widok; na dotyku: dwa palce</dd>
       <dt><kbd>Spacja</kbd></dt><dd>ogień</dd>
       <dt><kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dt><dd>jazda o jeden heks w 6 kierunkach, 4 ruchy na turę (albo klik w podświetlony sąsiedni heks)</dd>
       <dt>Klik</dt><dd>na dalsze pole: wieża obraca się w tę stronę</dd>
@@ -218,8 +220,8 @@ const CZ=32/ZPX;                                   /* toward-viewer vector (1,1,
 const LLEN=Math.hypot(-0.62,-0.10,0.78),LX=-0.62/LLEN,LY=-0.10/LLEN,LZ=0.78/LLEN;
 const SHV=[0.62/0.78,0.10/0.78];                   /* shadow offset per unit of height, view space */
 const R2=Math.SQRT2;
-let W=MAPW,H=MAPH,K=1,MX=0,MY=0,OX=MAPW/2,OY=MAPTOP,BGG=null;
-const VERSION='1.4';
+let W=MAPW,H=MAPH,K=1,K0=1,MX=0,MY=0,OX=MAPW/2,OY=MAPTOP,BGG=null,ZOOM=1,PANX=0,PANY=0;
+const VERSION='1.5';
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 const $=id=>document.getElementById(id);
@@ -810,6 +812,7 @@ addEventListener('keydown',e=>{
     case 'KeyW':tryMove(-90*DEG);break;case 'KeyE':tryMove(-30*DEG);break;case 'KeyD':tryMove(30*DEG);break;case 'KeyS':tryMove(90*DEG);break;case 'KeyA':tryMove(150*DEG);break;case 'KeyQ':tryMove(-150*DEG);break;
     case 'KeyR':rotateCam(e.shiftKey?-1:1);break;
     case 'Digit1':setWeapon(0);break;case 'Digit2':setWeapon(1);break;case 'Digit3':setWeapon(2);break;
+    case 'Equal':case 'NumpadAdd':zoomAt(cv.width/2,cv.height/2,1.35);break;case 'Minus':case 'NumpadSubtract':zoomAt(cv.width/2,cv.height/2,1/1.35);break;case 'Digit0':ZOOM=1;applyView();break;
     case 'Tab':cycleWeapon();break;case 'KeyM':toggleMute();break;
     case 'Escape':if(!fsEl())openMenu();break;}
 });
@@ -824,21 +827,42 @@ const ROT_STEP=110;let mdrag=null;
 cv.addEventListener('mousedown',e=>{if(e.button===1)e.preventDefault();});
 cv.addEventListener('auxclick',e=>{if(e.button===1)e.preventDefault();});
 cv.addEventListener('pointermove',e=>{
+  if(rdrag){panBy(e.clientX-rdrag.x,e.clientY-rdrag.y);rdrag.x=e.clientX;rdrag.y=e.clientY;return;}
+  if(e.pointerType==='touch'&&touches.has(e.pointerId)){touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pinch&&touches.size===2){const [a,b]=[...touches.values()],d=Math.hypot(a.x-b.x,a.y-b.y),mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+      const [dx,dy]=devPos(mx,my);zoomAt(dx,dy,d/Math.max(1,pinch.d));panBy(mx-pinch.mx,my-pinch.my);pinch={d,mx,my};return;}
+    if(tap&&tap.id===e.pointerId){const dx=e.clientX-tap.x,dy=e.clientY-tap.y;if(tap.moved||Math.hypot(dx,dy)>10){tap.moved=true;panBy(dx,dy);tap.x=e.clientX;tap.y=e.clientY;}return;}}
   if(mdrag){mdrag.acc+=e.clientX-mdrag.x;mdrag.x=e.clientX;
     while(mdrag.acc>ROT_STEP){mdrag.acc-=ROT_STEP;rotateCam(1);}
     while(mdrag.acc<-ROT_STEP){mdrag.acc+=ROT_STEP;rotateCam(-1);}return;}
   const p=evPos(e);G.hover=pick(p.x,p.y);});
-const endDrag=e=>{if(mdrag&&(e.button===1||e.type!=='pointerup')){mdrag=null;cv.style.cursor='';}};
+const endDrag=e=>{if(mdrag&&(e.button===1||e.type!=='pointerup')){mdrag=null;cv.style.cursor='';}
+  if(rdrag&&(e.button===2||e.type!=='pointerup')){rdrag=null;cv.style.cursor='';}
+  if(e.pointerType==='touch'){if(tap&&tap.id===e.pointerId&&!tap.moved&&e.type==='pointerup')clickAt(e);
+    touches.delete(e.pointerId);if(touches.size<2)pinch=null;if(!touches.size)tap=null;}};
 cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',endDrag);
 cv.addEventListener('pointerleave',()=>{G.hover=null;});
+let rdrag=null;const touches=new Map();let tap=null,pinch=null;
+cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('pointerdown',e=>{audio();
   if(e.button===1){e.preventDefault();mdrag={x:e.clientX,acc:0};try{cv.setPointerCapture(e.pointerId);}catch(_){}cv.style.cursor='grabbing';G.hover=null;return;}
-  if(e.button!==0&&e.pointerType==='mouse')return;
+  if(e.button===2&&e.pointerType==='mouse'){e.preventDefault();rdrag={x:e.clientX,y:e.clientY};try{cv.setPointerCapture(e.pointerId);}catch(_){}cv.style.cursor='move';return;}
+  if(e.pointerType==='touch'){touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(touches.size===2){tap=null;const [a,b]=[...touches.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),mx:(a.x+b.x)/2,my:(a.y+b.y)/2};}
+    else if(touches.size===1)tap={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false};
+    return;}
+  if(e.button!==0)return;
+  clickAt(e);});
+function clickAt(e){
   const p=evPos(e),c=pick(p.x,p.y);G.hover=c;const t=cur();
   if(!c||!t||t.ai||G.state!=='aim'||t.moving)return;const d=hexDist(c.q,c.r,t.q,t.r);
   if(d===1&&t.fuel>0){moveTo(t,c.q,c.r);return;}
-  if(d>0){const [hx,hy]=hexCenter(c.q,c.r);t.az=(Math.atan2(hy-t.y,hx-t.x)+Math.PI*2)%(Math.PI*2);sfx.blip();}});
-cv.addEventListener('wheel',e=>{const t=cur();if(t&&!t.ai&&G.state==='aim'){e.preventDefault();t.pow=clamp(t.pow-Math.sign(e.deltaY)*2,10,100);}},{passive:false});
+  if(d>0){const [hx,hy]=hexCenter(c.q,c.r);t.az=(Math.atan2(hy-t.y,hx-t.x)+Math.PI*2)%(Math.PI*2);sfx.blip();}}
+cv.addEventListener('wheel',e=>{e.preventDefault();
+  if(e.shiftKey){const t=cur();if(t&&!t.ai&&G.state==='aim')t.pow=clamp(t.pow-Math.sign(e.deltaY||e.deltaX)*2,10,100);return;}
+  const [dx,dy]=devPos(e.clientX,e.clientY);zoomAt(dx,dy,Math.pow(1.0015,-clamp(e.deltaY,-200,200)));},{passive:false});
+$('bZin').addEventListener('click',()=>zoomAt(cv.width/2,cv.height/2,1.35));
+$('bZout').addEventListener('click',()=>zoomAt(cv.width/2,cv.height/2,1/1.35));
 document.querySelectorAll('[data-hold]').forEach(b=>{const k=b.dataset.hold;
   const on=e=>{e.preventDefault();holds[k]=true;b.classList.add('held');audio();},off=()=>{holds[k]=false;b.classList.remove('held');};
   b.addEventListener('pointerdown',on);['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,off));});
@@ -1047,9 +1071,20 @@ function hud(){const t=cur();
 
 /* ===== layout & loop ===== */
 const stage=$('stage');
+/* zoom & pan: ZOOM multiplies the fit scale, PANX/PANY shift the map in art px */
+const ZMAX=3;
+function applyView(){K=K0*ZOOM;W=cv.width/K;H=cv.height/K;
+  const lx=MAPW/2*(1-1/ZOOM)+60*(ZOOM>1?1:0),ly=MAPH/2*(1-1/ZOOM)+60*(ZOOM>1?1:0);
+  if(ZOOM<=1.001){PANX=0;PANY=0;}else{PANX=clamp(PANX,-lx,lx);PANY=clamp(PANY,-ly,ly);}
+  MX=(W-MAPW)/2+PANX;MY=(H-MAPH)/2+PANY;OX=MX+MAPW/2;OY=MY+MAPTOP;}
+function zoomAt(dx,dy,f){const K1=K,z=clamp(ZOOM*f,1,ZMAX);if(z===ZOOM)return;const K2=K0*z;
+  const ux=(dx-cv.width/2)/K1-PANX,uy=(dy-cv.height/2)/K1-PANY;
+  PANX=(K1/K2)*(PANX+ux)-ux;PANY=(K1/K2)*(PANY+uy)-uy;ZOOM=z;applyView();}
+function devPos(cx,cy){const r=cv.getBoundingClientRect();return [(cx-r.left)/r.width*cv.width,(cy-r.top)/r.height*cv.height];}
+function panBy(dcx,dcy){const r=cv.getBoundingClientRect();PANX+=dcx*(cv.width/r.width)/K;PANY+=dcy*(cv.height/r.height)/K;applyView();}
 function fit(){const r=stage.getBoundingClientRect(),cw=Math.max(200,r.width),ch=Math.max(150,r.height),dpr=Math.min(2,window.devicePixelRatio||1);
   const bw=Math.round(cw*dpr),bh=Math.round(ch*dpr);if(cv.width!==bw||cv.height!==bh){cv.width=bw;cv.height=bh;}
-  K=Math.min(bw/MAPW,bh/MAPH);W=bw/K;H=bh/K;MX=(W-MAPW)/2;MY=(H-MAPH)/2;OX=MX+MAPW/2;OY=MY+MAPTOP;
+  K0=Math.min(bw/MAPW,bh/MAPH);applyView();
   BGG=ctx.createRadialGradient(bw/2,bh*0.45,Math.min(bw,bh)*0.1,bw/2,bh/2,Math.max(bw,bh)*0.75);BGG.addColorStop(0,'#26304a');BGG.addColorStop(1,'#0b0d14');}
 new ResizeObserver(fit).observe(stage);fit();
 setupMap(['Ty','CPU'],true,24);

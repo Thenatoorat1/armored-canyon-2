@@ -1,6 +1,6 @@
 # Armored Canyon 2
 
-Wersja 1.4 (numer widać w menu i w górnym pasku gry).
+Wersja 1.5 (numer widać w menu i w górnym pasku gry).
 
 Izometryczna gra artyleryjska z czołgami, działająca w przeglądarce. Cała gra to jeden plik `index.html`, bez instalacji i bez serwera.
 
@@ -20,7 +20,9 @@ Ustaw kierunek wieży, kąt lufy i moc, weź poprawkę na wiatr i trafiaj przeci
 |---|---|
 | ← → | obrót wieży (z Shift wolniej) |
 | ↑ ↓ | kąt lufy |
-| Z / X | moc strzału (albo kółko myszy) |
+| Z / X | moc strzału (albo Shift + kółko myszy) |
+| kółko myszy, + / − | zbliżenie i oddalenie (0 wraca do całej mapy) |
+| prawy przycisk + ruch | przesuwanie widoku |
 | Spacja | ogień |
 | Q W E A S D | jazda o jeden heks w 6 kierunkach |
 | Klik | w sąsiedni heks: jazda; w dalszy heks: obrót wieży |
@@ -31,7 +33,7 @@ Ustaw kierunek wieży, kąt lufy i moc, weź poprawkę na wiatr i trafiaj przeci
 | M | dźwięk wł./wył. |
 | Esc | menu |
 
-Na telefonie i tablecie działa dotyk i przyciski pod mapą.
+Na telefonie i tablecie działa dotyk i przyciski pod mapą; dwa palce przybliżają, a przeciągnięcie palcem przesuwa widok.
 
 ## Uruchomienie lokalnie
 
