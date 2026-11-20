@@ -41,6 +41,8 @@ body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--f-pixel
 #wval{font-variant-numeric:tabular-nums;color:var(--ink);min-width:3ch;text-align:left}
 .mini{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 .mini .btn{font-size:12px;padding:3px 7px;min-width:0}
+.ver{font-size:12px;color:var(--dim);align-self:center;font-variant-numeric:tabular-nums}
+.panel p.ver{margin-top:-8px}
 
 #stage{position:relative;min-height:0;overflow:hidden;border:2px solid var(--line);background:#0b0d14}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
@@ -134,6 +136,7 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
         <button class="btn" id="bMenu">Menu</button>
         <button class="btn" id="bFs">Pełny ekran</button>
         <button class="btn" id="bMute">Dźwięk: wł.</button>
+        <span class="ver" id="verHud"></span>
       </div>
     </div>
     <div class="card right" id="card1" style="--c:#e0574a">
@@ -169,6 +172,7 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
 <div id="ov">
   <div class="panel" id="pMenu">
     <h1>Armored Canyon <em>ISO</em></h1>
+    <p class="ver" id="verMenu"></p>
     <p>Artyleria czołgów na niszczalnym terenie. Ustaw kierunek wieży, kąt lufy i moc, weź poprawkę na wiatr i rozbij przeciwnika, zanim on rozbije ciebie. Wybuchy kopią kratery, kruszą budynki i łamią drzewa, a czołg, któremu zabierzesz grunt spod gąsienic, spadnie. Każda runda to nowa, losowa mapa.</p>
     <div class="opt"><span>Wielkość mapy</span><div class="seg" id="mapSize">
       <button class="btn" data-size="18">Mała</button><button class="btn on" data-size="24">Średnia</button><button class="btn" data-size="30">Duża</button><button class="btn" data-size="0">Losowa</button>
@@ -185,7 +189,7 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
       <dt><kbd>Spacja</kbd></dt><dd>ogień</dd>
       <dt><kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dt><dd>jazda o jeden heks w 6 kierunkach, 4 ruchy na turę (albo klik w podświetlony sąsiedni heks)</dd>
       <dt>Klik</dt><dd>na dalsze pole: wieża obraca się w tę stronę</dd>
-      <dt><kbd>R</kbd></dt><dd>obrót kamery o 90°, żeby zajrzeć za góry</dd>
+      <dt><kbd>R</kbd> / wciśnięta rolka</dt><dd>obrót kamery o 90° (Shift+R w drugą stronę); z wciśniętą rolką przesuń mysz w lewo lub w prawo</dd>
       <dt><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></dt><dd>broń: pocisk, ciężki (×3), kasetowy (×2)</dd>
       <dt><kbd>F</kbd></dt><dd>pełny ekran</dd>
     </dl>
@@ -215,6 +219,7 @@ const LLEN=Math.hypot(-0.62,-0.10,0.78),LX=-0.62/LLEN,LY=-0.10/LLEN,LZ=0.78/LLEN
 const SHV=[0.62/0.78,0.10/0.78];                   /* shadow offset per unit of height, view space */
 const R2=Math.SQRT2;
 let W=MAPW,H=MAPH,K=1,MX=0,MY=0,OX=MAPW/2,OY=MAPTOP,BGG=null;
+const VERSION='1.2';
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 const $=id=>document.getElementById(id);
@@ -718,7 +723,7 @@ function tryMove(ang){const t=cur();if(G.state!=='aim'||t.ai||t.moving||t.fallin
   if(best)moveTo(t,best[0],best[1]);}
 function setWeapon(k){const t=cur();if(!t||t.ai||G.state!=='aim')return;if(t.ammo[k]<=0){showMsg('Brak amunicji: '+WEAPONS[k].name);return;}t.weapon=k;sfx.blip();}
 function cycleWeapon(){const t=cur();if(!t||t.ai||G.state!=='aim')return;for(let n=1;n<=3;n++){const k=(t.weapon+n)%3;if(t.ammo[k]>0){t.weapon=k;sfx.blip();return;}}}
-function rotateCam(){G.rot=(G.rot+1)%4;renderAll();sfx.blip();}
+function rotateCam(dir=1){G.rot=(G.rot+dir+4)%4;renderAll();sfx.blip();}
 
 /* ===== AI ===== */
 function simulate(t,az,el,pw){const s=mkShell(t,az,el,pw,0);for(let n=0;n<1200;n++){const r=stepShell(s,1/60,G.wind);if(r)return r==='lost'?null:{x:s.x,y:s.y,z:s.z};}return null;}
@@ -763,7 +768,7 @@ addEventListener('keydown',e=>{
   switch(e.code){
     case 'Space':if(!cur().ai)fire();break;
     case 'KeyW':tryMove(-90*DEG);break;case 'KeyE':tryMove(-30*DEG);break;case 'KeyD':tryMove(30*DEG);break;case 'KeyS':tryMove(90*DEG);break;case 'KeyA':tryMove(150*DEG);break;case 'KeyQ':tryMove(-150*DEG);break;
-    case 'KeyR':rotateCam();break;
+    case 'KeyR':rotateCam(e.shiftKey?-1:1);break;
     case 'Digit1':setWeapon(0);break;case 'Digit2':setWeapon(1);break;case 'Digit3':setWeapon(2);break;
     case 'Tab':cycleWeapon();break;case 'KeyM':toggleMute();break;
     case 'Escape':if(!fsEl())openMenu();break;}
@@ -775,9 +780,21 @@ function hexPoly(q,r){return hexCorners(q,r).map(([x,y])=>proj(x,y,surfAt(clamp(
 function hexPts(q,r){const C=hexCorners(q,r),P=[];for(let k=0;k<6;k++){const a=C[k],b=C[(k+1)%6];for(let s=0;s<3;s++){const x=a[0]+(b[0]-a[0])*s/3,y=a[1]+(b[1]-a[1])*s/3;P.push(proj(x,y,surfAt(clamp(x,0,N-0.01),clamp(y,0,N-0.01))));}}return P;}
 function inPoly(px,py,P){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if(((a.y>py)!==(b.y>py))&&(px<(b.x-a.x)*(py-a.y)/(b.y-a.y)+a.x))c=!c;}return c;}
 function pick(px,py){for(const c of CELLS)if(inPoly(px,py,hexPoly(c.q,c.r)))return {q:c.q,r:c.r};return null;}
-cv.addEventListener('pointermove',e=>{const p=evPos(e);G.hover=pick(p.x,p.y);});
+const ROT_STEP=110;let mdrag=null;
+cv.addEventListener('mousedown',e=>{if(e.button===1)e.preventDefault();});
+cv.addEventListener('auxclick',e=>{if(e.button===1)e.preventDefault();});
+cv.addEventListener('pointermove',e=>{
+  if(mdrag){mdrag.acc+=e.clientX-mdrag.x;mdrag.x=e.clientX;
+    while(mdrag.acc>ROT_STEP){mdrag.acc-=ROT_STEP;rotateCam(1);}
+    while(mdrag.acc<-ROT_STEP){mdrag.acc+=ROT_STEP;rotateCam(-1);}return;}
+  const p=evPos(e);G.hover=pick(p.x,p.y);});
+const endDrag=e=>{if(mdrag&&(e.button===1||e.type!=='pointerup')){mdrag=null;cv.style.cursor='';}};
+cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',endDrag);
 cv.addEventListener('pointerleave',()=>{G.hover=null;});
-cv.addEventListener('pointerdown',e=>{audio();const p=evPos(e),c=pick(p.x,p.y);G.hover=c;const t=cur();
+cv.addEventListener('pointerdown',e=>{audio();
+  if(e.button===1){e.preventDefault();mdrag={x:e.clientX,acc:0};try{cv.setPointerCapture(e.pointerId);}catch(_){}cv.style.cursor='grabbing';G.hover=null;return;}
+  if(e.button!==0&&e.pointerType==='mouse')return;
+  const p=evPos(e),c=pick(p.x,p.y);G.hover=c;const t=cur();
   if(!c||!t||t.ai||G.state!=='aim'||t.moving)return;const d=hexDist(c.q,c.r,t.q,t.r);
   if(d===1&&t.fuel>0){moveTo(t,c.q,c.r);return;}
   if(d>0){const [hx,hy]=hexCenter(c.q,c.r);t.az=(Math.atan2(hy-t.y,hx-t.x)+Math.PI*2)%(Math.PI*2);sfx.blip();}});
@@ -990,6 +1007,7 @@ function fit(){const r=stage.getBoundingClientRect(),cw=Math.max(200,r.width),ch
   BGG=ctx.createRadialGradient(bw/2,bh*0.45,Math.min(bw,bh)*0.1,bw/2,bh/2,Math.max(bw,bh)*0.75);BGG.addColorStop(0,'#26304a');BGG.addColorStop(1,'#0b0d14');}
 new ResizeObserver(fit).observe(stage);fit();
 setupMap(['Ty','CPU'],true,24);
+$('verHud').textContent='v'+VERSION;$('verMenu').textContent='Wersja '+VERSION;
 openMenu();
 let last=performance.now();
 function frame(ts){const dt=Math.min(0.05,(ts-last)/1000);last=ts;now+=dt;if(!G.paused)update(dt);render();hud();requestAnimationFrame(frame);}

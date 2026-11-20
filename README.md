@@ -1,5 +1,7 @@
 # Armored Canyon ISO
 
+Wersja 1.2 (numer widać w menu i w górnym pasku gry).
+
 Izometryczna gra artyleryjska z czołgami, działająca w przeglądarce. Cała gra to jeden plik `index.html`, bez instalacji i bez serwera.
 
 ## Jak grać
@@ -22,7 +24,8 @@ Ustaw kierunek wieży, kąt lufy i moc, weź poprawkę na wiatr i trafiaj przeci
 | Spacja | ogień |
 | Q W E A S D | jazda o jeden heks w 6 kierunkach |
 | Klik | w sąsiedni heks: jazda; w dalszy heks: obrót wieży |
-| R | obrót kamery o 90° |
+| R / Shift+R | obrót kamery o 90° w prawo / w lewo |
+| wciśnięta rolka + ruch myszy | obrót kamery w lewo lub w prawo |
 | 1 / 2 / 3 lub Tab | wybór broni |
 | F | pełny ekran |
 | M | dźwięk wł./wył. |
