@@ -1,6 +1,6 @@
 # Armored Canyon 2
 
-Wersja 1.7.1 (numer widać w menu i w górnym pasku gry).
+Wersja 1.8 (numer widać w menu i w górnym pasku gry).
 
 Izometryczna gra artyleryjska z czołgami, działająca w przeglądarce. Cała gra to jeden plik `index.html`, bez instalacji i bez serwera.
 
@@ -17,7 +17,9 @@ Ustaw kierunek wieży, kąt lufy i moc, weź poprawkę na wiatr i trafiaj przeci
 - **Mieszkańcy:** co kilka rund z krawędzi mapy nadciągają dwie wrogie sobie frakcje pasujące do klimatu (np. skorpiony i czerwie na pustyni, pingwiny-komandosi i lodowe golemy na Antarktydzie). Atakują oba czołgi i walczą między sobą; da się je trafiać pociskami
 - **Złoto i przekupstwo:** złoto za każdą turę, za trafienia przeciwnika i za zabitych mieszkańców. Klawisz B lub przycisk „Przekup” – za złoto albo 1 ciężki + 1 kasetowy pocisk frakcja przez 3 rundy nie atakuje ciebie i rzuca się na przeciwnika. Komputer też potrafi przekupywać
 - **Woda:** rwący nurt porywa czołg, który wjedzie do rzeki (może go wynieść za mapę), lód pęka od wybuchów
-- **Otoczenie:** budynki z klocków rozpadają się kawałek po kawałku w miejscu trafienia, a niepodparte części osuwają się w dół; drzewa łamią się i padają
+- **Garaż:** w menu każdy gracz wybiera model czołgu (lekki, średni, ciężki, superciężki), jeden z 9 kolorów i oznaczenie na wieży (numer, gwiazda, krzyż, szewron, tarcza albo brak). Wybór zapamiętuje przeglądarka
+- **Grafika:** pikselowa – czołgi z dowódcą we włazie, kolorowe miasteczka (domy z dachówką i kominem, sklepy z markizami, kamienice, fabryki z kominem), robaki i skorpiony na pustyni
+- **Otoczenie:** budynki z drobnych klocków rozpadają się piksel po pikselu w miejscu trafienia, a niepodparte części osuwają się w dół; drzewa łamią się i padają
 
 ## Sterowanie
 
