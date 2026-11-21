@@ -1,6 +1,6 @@
 # Armored Canyon 2
 
-Wersja 1.7 (numer widać w menu i w górnym pasku gry).
+Wersja 1.7.1 (numer widać w menu i w górnym pasku gry).
 
 Izometryczna gra artyleryjska z czołgami, działająca w przeglądarce. Cała gra to jeden plik `index.html`, bez instalacji i bez serwera.
 

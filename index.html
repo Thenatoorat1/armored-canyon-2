@@ -240,7 +240,7 @@ const LLEN=Math.hypot(-0.62,-0.10,0.78),LX=-0.62/LLEN,LY=-0.10/LLEN,LZ=0.78/LLEN
 const SHV=[0.62/0.78,0.10/0.78];                   /* shadow offset per unit of height, view space */
 const R2=Math.SQRT2;
 let W=MAPW,H=MAPH,K=1,K0=1,MX=0,MY=0,OX=MAPW/2,OY=MAPTOP,BGG=null,ZOOM=1,PANX=0,PANY=0;
-const VERSION='1.7';
+const VERSION='1.7.1';
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 const $=id=>document.getElementById(id);
@@ -603,6 +603,7 @@ function treeSprite(seed,pal,sc,trunk,nb){
     gr.addColorStop(0,pal[0]);gr.addColorStop(0.5,pal[1]);gr.addColorStop(1,pal[2]);g.fillStyle=gr;g.beginPath();g.arc(b.x,b.y,b.r,0,Math.PI*2);g.fill();}
   for(let k=0;k<160*sc;k++){const b=blobs[(R()*blobs.length)|0],a=R()*Math.PI*2,d=R()*b.r*0.85,x=b.x+Math.cos(a)*d,y=b.y+Math.sin(a)*d;
     const up=(y<b.y);g.fillStyle=up&&R()<0.7?'rgba(200,235,150,.45)':'rgba(10,30,10,.35)';g.fillRect(x,y,1.3*sc,1.3*sc);}
+  if(!trunk){let bot=0;for(const b of blobs)bot=Math.max(bot,b.y+b.r);return {c,ax:cx,ay:bot-1.5*sc,sw:13*sc,low:1};}
   return {c,ax:cx,ay:h*0.86,sw:20*sc};
 }
 function pineSprite(seed,sc){
@@ -620,15 +621,18 @@ function rockSprite(seed,sc,pal=['#c3c0b6','#8d8a83','#4c4a47']){
   for(let k=0;k<8;k++){const a=k/8*Math.PI*2,r=(0.75+R()*0.35);pts.push([cx+Math.cos(a)*13*sc*r,cy+Math.sin(a)*7*sc*r-(Math.sin(a)<0?5*sc:0)]);}
   const gr=g.createLinearGradient(cx-12*sc,cy-10*sc,cx+12*sc,cy+6*sc);gr.addColorStop(0,pal[0]);gr.addColorStop(0.5,pal[1]);gr.addColorStop(1,pal[2]);
   g.beginPath();pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.closePath();g.fillStyle=gr;g.fill();g.strokeStyle='#2b2a28';g.lineWidth=1;g.stroke();
-  return {c,ax:cx,ay:cy+5*sc,sw:12*sc};
+  let bot=0;for(const p of pts)bot=Math.max(bot,p[1]);
+  g.save();g.beginPath();pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.closePath();g.clip();
+  const sh=g.createLinearGradient(0,bot-5*sc,0,bot);sh.addColorStop(0,'rgba(0,0,0,0)');sh.addColorStop(1,'rgba(0,0,0,.45)');g.fillStyle=sh;g.fillRect(0,bot-5*sc,w,5*sc);g.restore();
+  return {c,ax:cx,ay:bot-2*sc,sw:13*sc,low:1};
 }
-function makeSnowy(sp){const c=canvas(sp.c.width,sp.c.height),g=c.getContext('2d');g.drawImage(sp.c,0,0);
+function makeSnowy(sp){const keep=sp;const c=canvas(sp.c.width,sp.c.height),g=c.getContext('2d');g.drawImage(sp.c,0,0);
   const w=c.width,h=c.height,im=g.getImageData(0,0,w,h),D=im.data,out=new Uint8ClampedArray(D),A=(x,y)=>y<0?0:D[(y*w+x)*4+3];
   for(let y=0;y<h;y++)for(let x=0;x<w;x++){const o=(y*w+x)*4;if(D[o+3]<128)continue;
     let cap=false;for(let k=1;k<=3;k++)if(A(x,y-k)<60){cap=true;break;}
     const fleck=ihash(x*3+7,y*5+1)<0.09&&y<h*0.72;
     if(cap||fleck){const t=cap?0.92:0.6;out[o]=D[o]+(240-D[o])*t;out[o+1]=D[o+1]+(245-D[o+1])*t;out[o+2]=D[o+2]+(250-D[o+2])*t;}}
-  im.data.set(out);g.putImageData(im,0,0);return {c,ax:sp.ax,ay:sp.ay,sw:sp.sw};}
+  im.data.set(out);g.putImageData(im,0,0);return {...keep,c};}
 function rrPath(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.lineTo(x+w-r,y);g.arc(x+w-r,y+r,r,-Math.PI/2,0);g.lineTo(x+w,y+h);g.lineTo(x,y+h);g.lineTo(x,y+r);g.arc(x+r,y+r,r,Math.PI,Math.PI*1.5);g.closePath();}
 function cactusSprite(seed,sc){const R=mkrng(seed),w=48*sc,h=66*sc,c=canvas(w,h),g=c.getContext('2d'),cx=w/2,base=h*0.92;
   const col=(x0,y0,ww,hh)=>{const gr=g.createLinearGradient(x0,0,x0+ww,0);gr.addColorStop(0,'#86b862');gr.addColorStop(0.45,'#4f8a3a');gr.addColorStop(1,'#2a5222');
@@ -1331,7 +1335,8 @@ function drawGround(){
   for(const p of PROPS){if(p.alive||!p.stump)continue;const q=proj(p.x,p.y,groundAt(p.x,p.y));
     ctx.fillStyle=p.stump===2?'#1d1a18':'#4a3020';ctx.fillRect(q.x-2.6,q.y-5,5.2,5);ctx.fillStyle=p.stump===2?'#2c2724':'#c9a46a';ctx.beginPath();ctx.ellipse(q.x,q.y-5,2.6,1.3,0,0,Math.PI*2);ctx.fill();}
   for(const p of PROPS){if(!p.alive||p.fall)continue;const sp=SPRITES[p.kind][p.v],q=proj(p.x,p.y,groundAt(p.x,p.y)),s=p.s;
-    ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(q.x+sp.sw*0.6*s,q.y+2,sp.sw*s,sp.sw*0.42*s,0,0,Math.PI*2);ctx.fill();}
+    if(sp.low){ctx.fillStyle='rgba(0,0,0,.32)';ctx.beginPath();ctx.ellipse(q.x+sp.sw*0.28*s,q.y+0.5,sp.sw*0.95*s,sp.sw*0.4*s,0,0,Math.PI*2);ctx.fill();}
+    else{ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(q.x+sp.sw*0.6*s,q.y+2,sp.sw*s,sp.sw*0.42*s,0,0,Math.PI*2);ctx.fill();}}
   for(const t of G.tanks){const g=t._g;if(g.shadow.length>2){poly(g.shadow);ctx.fillStyle='rgba(0,0,0,.36)';ctx.fill();}}
   for(const s of G.shells){const gz=surfAt(s.x,s.y);if(gz===-Infinity)continue;const q=proj(s.x,s.y,gz);ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(q.x+2,q.y,5,2.4,0,0,Math.PI*2);ctx.fill();}
   const ws=Math.floor(now*3);for(let k=0;k<Math.min(10,WATERC.length);k++){const c=WATERC[Math.floor(ihash(k,ws)*WATERC.length)];
