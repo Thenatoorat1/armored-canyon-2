@@ -1,6 +1,6 @@
 # Armored Canyon 2
 
-Wersja 1.9 (numer widać w menu i w górnym pasku gry).
+Wersja 1.10 (numer widać w menu i w górnym pasku gry).
 
 Izometryczna gra artyleryjska z czołgami, działająca w przeglądarce. Cała gra to jeden plik `index.html`, bez instalacji i bez serwera.
 
@@ -13,8 +13,8 @@ Ustaw kierunek wieży, kąt lufy i moc, weź poprawkę na wiatr i trafiaj przeci
 - **Bronie:** pocisk (bez limitu), ciężki (×3), kasetowy (×2)
 - **Mapa:** losowa w każdej rundzie, do wyboru mała, średnia, duża albo losowa wielkość
 - **Klimaty:** umiarkowany, zima (śnieg na drzewach, losowo zamarznięte stawy), Antarktyda (lód i kry), pustynia, skały z rzekami, góry z gęstymi lasami i rwącą rzeką
-- **Pogoda:** zmienia się w trakcie walki – deszcz, burza z piorunami, mgła, śnieżyca, zamieć, upał, burza piaskowa; silniejszy i porywisty wiatr oraz gorsza widoczność toru lotu
-- **Mieszkańcy:** co kilka rund z krawędzi mapy nadciągają dwie wrogie sobie frakcje pasujące do klimatu (wilki oraz yeti z bałwanami zimą, pingwiny-komandosi i lodowe golemy na Antarktydzie, skorpiony i czerwie na pustyni, kryształowe kraby i sępy w skałach, niedźwiedzie i leśne enty w górach, robo-pająki i dzikie drony w klimacie umiarkowanym). Atakują oba czołgi i walczą między sobą; da się je trafiać pociskami
+- **Pogoda:** utrzymuje się przez 3–5 rund, potem się zmienia – deszcz, burza z piorunami, mgła, śnieżyca, zamieć, upał, burza piaskowa; silniejszy i porywisty wiatr oraz gorsza widoczność toru lotu
+- **Mieszkańcy:** od czasu do czasu z krawędzi mapy nadciąga grupka (3–6 sztuk). Kolejna pojawia się dopiero 2–3 rundy po tym, jak poprzednia zniknie z mapy. Są to dwie wrogie sobie frakcje pasujące do klimatu (wilki oraz yeti z bałwanami zimą, pingwiny-komandosi i lodowe golemy na Antarktydzie, skorpiony i czerwie na pustyni, kryształowe kraby i sępy w skałach, niedźwiedzie i leśne enty w górach, robo-pająki i dzikie drony w klimacie umiarkowanym). Atakują oba czołgi i walczą między sobą; da się je trafiać pociskami
 - **Złoto i przekupstwo:** złoto za każdą turę, za trafienia przeciwnika i za zabitych mieszkańców. Klawisz B lub przycisk „Przekup” – za złoto albo 1 ciężki + 1 kasetowy pocisk frakcja przez 3 rundy nie atakuje ciebie i rzuca się na przeciwnika. Komputer też potrafi przekupywać
 - **Woda:** rwący nurt porywa czołg, który wjedzie do rzeki (może go wynieść za mapę), lód pęka od wybuchów
 - **Garaż:** w menu każdy gracz wybiera model czołgu (lekki, średni, ciężki, superciężki), jeden z 9 kolorów i oznaczenie na wieży (numer, gwiazda, krzyż, szewron, tarcza albo brak). Wybór zapamiętuje przeglądarka

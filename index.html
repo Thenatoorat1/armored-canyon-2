@@ -260,7 +260,7 @@ const LLEN=Math.hypot(-0.62,-0.10,0.78),LX=-0.62/LLEN,LY=-0.10/LLEN,LZ=0.78/LLEN
 const SHV=[0.62/0.78,0.10/0.78];                   /* shadow offset per unit of height, view space */
 const R2=Math.SQRT2;
 let W=MAPW,H=MAPH,K=1,K0=1,MX=0,MY=0,OX=MAPW/2,OY=MAPTOP,BGG=null,ZOOM=1,PANX=0,PANY=0;
-const VERSION='1.9';
+const VERSION='1.10';
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 const $=id=>document.getElementById(id);
@@ -1038,9 +1038,9 @@ function randWind(){const a=rnd(0,Math.PI*2),m=(Math.random()<0.15?0:rnd(0.3,2.6
 function setupMap(names,ai,n){alloc(n);fit();const ps=genMap();G.rot=0;
   G.tanks=[mkTank(0,ps[0],false,names[0]),mkTank(1,ps[1],ai,names[1])];faceEach();G.tanks.forEach(updTilt);renderAll();}
 function newRound(){const ai=G.mode==='cpu';BIO=BIOMES[G.biomeSel==='random'?BIOKEYS[ri(0,BIOKEYS.length-1)]:G.biomeSel];G.weather=pickW(BIO.weather);setupMap(ai?['Ty','CPU']:['Gracz 1','Gracz 2'],ai,G.sizeSel||[18,24,30][ri(0,2)]);
-  G.shells=[];G.parts=[];G.flashes=[];G.floaters=[];G.turn=0;G.round=1;G.envDone=false;G.creatures=[];G.cshots=[];G.gold=[30,30];G.fac=BIOFAC[BIOKEYS.find(k=>BIOMES[k]===BIO)].map(ty=>({type:ty,n:CTYPES[ty].n,ally:null,left:0}));G.wind=randWind();G.inGame=true;G.overShown=false;startTurn(true);showMsg(BIO.name+' · '+WEATHER[G.weather].n,2200);}
+  G.shells=[];G.parts=[];G.flashes=[];G.floaters=[];G.turn=0;G.round=1;G.envDone=false;G.creatures=[];G.nextWave=ri(1,2);G.waveOn=false;G.wLeft=ri(3,5);G.wNew=false;G.cshots=[];G.gold=[30,30];G.fac=BIOFAC[BIOKEYS.find(k=>BIOMES[k]===BIO)].map(ty=>({type:ty,n:CTYPES[ty].n,ally:null,left:0}));G.wind=randWind();G.inGame=true;G.overShown=false;startTurn(true);showMsg(BIO.name+' · '+WEATHER[G.weather].n,2200);}
 function startTurn(first){const t=cur();t.fuel=4;if(!first)G.gold[t.idx]+=8;if(!first){const nw=randWind();G.wind={x:G.wind.x*0.4+nw.x*0.6,y:G.wind.y*0.4+nw.y*0.6};}
-  let wmsg='';if(!first&&Math.random()<0.3){const nw=pickW(BIO.weather);if(nw!==G.weather){G.weather=nw;wmsg=' · pogoda: '+WEATHER[nw].n.toLowerCase();const w0=randWind();G.wind={x:G.wind.x*0.3+w0.x*0.7,y:G.wind.y*0.3+w0.y*0.7};}}
+  let wmsg='';if(!first&&G.wNew){G.wNew=false;let nw=G.weather;for(let k=0;k<8&&nw===G.weather;k++)nw=pickW(BIO.weather);G.wLeft=ri(3,5);if(nw!==G.weather){G.weather=nw;wmsg=' · pogoda: '+WEATHER[nw].n.toLowerCase();const w0=randWind();G.wind={x:G.wind.x*0.3+w0.x*0.7,y:G.wind.y*0.3+w0.y*0.7};}}
   G.state='aim';G.timer=0;G.aiPlan=null;showMsg((G.mode==='cpu'?(t.ai?'Tura komputera':'Twoja tura'):'Tura: '+t.name)+wmsg,wmsg?2000:1100);}
 function fire(){const t=cur();if(G.state!=='aim'||t.moving||t.sweep)return;
   if(t.ammo[t.weapon]<=0)t.weapon=0;if(t.ammo[t.weapon]!==Infinity)t.ammo[t.weapon]--;
@@ -1078,7 +1078,7 @@ function spawnCreature(f,q,r){let ty=G.fac[f].type;if(CTYPES[ty].alt&&Math.rando
   const c={id:++G.cid,f,type:ty,q,r,x,y,z:Math.max(groundAt(x,y),iceAt(x,y)?WL:-9),hp:T.hp,max:T.hp,alive:true,face:Math.random()<0.5?1:-1,path:[],pi:0,pp:0,lunge:-1,moving:false};
   G.creatures.push(c);for(let k=0;k<8;k++)part(x,y,c.z+0.2,rnd(-1,1),rnd(-1,1),rnd(0.5,1.5),rnd(0.6,1.1),'smoke',{r:rnd(4,7)});return c;}
 function spawnWave(){const live=G.creatures.filter(c=>c.alive).length,MAX=Math.round(14*N/24);if(live>=MAX)return;
-  const n=Math.min(MAX-live,2+Math.floor(G.round/2)),eA=ri(0,3),eB=(eA+2)%4,occ=new Set();
+  if(live>0)return;const n=Math.min(MAX,3+Math.min(3,Math.floor(G.round/4))),eA=ri(0,3),eB=(eA+2)%4,occ=new Set();
   for(const t of G.tanks)if(t.alive)occ.add(t.q+','+t.r);for(const c of G.creatures)if(c.alive)occ.add(c.q+','+c.r);
   const near=(e,x,y)=>e===0?x<1.7:e===1?y<1.7:e===2?x>N-1.7:y>N-1.7;let made=0;
   for(let k=0;k<n;k++){const f=k%2,e=f?eB:eA,T=CTYPES[G.fac[f].type];
@@ -1133,7 +1133,8 @@ function updateEnv(dt){G.envT+=dt;
       G.flashes.push({x,y,z,t:0,dur:0.25,r:12});for(let i=0;i<6;i++)part(x,y,z,rnd(-1.5,1.5),rnd(-1.5,1.5),rnd(1,3),rnd(0.3,0.6),'spark',{g:0.6});
       if(!sh.miss&&tgtAlive(sh.tg)){if(sh.tg.tank)hurtTank(sh.tg.tank,sh.dmg,sh.f);else hurtCreature(sh.tg.cr,sh.dmg,null);}}
     if(G.envT>0.45&&!G.cshots.length&&G.creatures.every(c=>c.lunge<0)){
-      if(G.round===1||G.round%2===1)spawnWave();
+      const live=G.creatures.some(c=>c.alive);
+      if(live)G.waveOn=true;else{if(G.waveOn){G.waveOn=false;G.nextWave=G.round+ri(2,3);}if(G.round>=G.nextWave){spawnWave();if(G.creatures.some(c=>c.alive))G.waveOn=true;}}
       G.state='settle';G.timer=0;}}}
 function drawCShots(){for(const sh of G.cshots){const o=sh.tg.tank||sh.tg.cr,q=sh.t/sh.dur,x=sh.x0+(o.x-sh.x0)*q,y=sh.y0+(o.y-sh.y0)*q,z=sh.z0+(o.z+0.4-sh.z0)*q+Math.sin(q*Math.PI)*1.4,p=proj(x,y,z);
   ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,8);g.addColorStop(0,sh.col);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);ctx.fill();
@@ -1332,7 +1333,7 @@ function openBribe(){const t=cur();if(!G.inGame||!G.foes||!t||t.ai||G.state!=='a
     b1.onclick=()=>{if(doBribe(f,t,'gold'))closeOverlay();};b2.onclick=()=>{if(doBribe(f,t,'ammo'))closeOverlay();};A.append(b1,b2);L.append(row);}}
 function nextTurn(){let n=G.turn;for(let k=0;k<G.tanks.length;k++){n=(n+1)%G.tanks.length;if(G.tanks[n].alive)break;}
   const wrap=n<=G.turn;if(wrap&&G.foes&&!G.envDone){G.envDone=true;startEnv();return;}
-  G.envDone=false;if(wrap)G.round++;G.turn=n;startTurn(false);}
+  G.envDone=false;if(wrap){G.round++;if(--G.wLeft<=0)G.wNew=true;}G.turn=n;startTurn(false);}
 function gameOver(w){G.state='over';G.timer=0;G.overShown=false;G.winner=w;if(w)G.score[w.idx]++;}
 function canMove(t,q,r){
   if(!hexValid(q,r))return 'Koniec mapy';
